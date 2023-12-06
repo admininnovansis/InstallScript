@@ -17,6 +17,12 @@
 OE_USER="odoo"
 OE_HOME="/$OE_USER"
 OE_HOME_EXT="/$OE_USER/${OE_USER}-server"
+
+INSTALL_POSTGRES="True"
+# Installs postgreSQL V14 instead of defaults (e.g V12 for Ubuntu 20/22) - this improves performance
+INSTALL_POSTGRESQL_FOURTEEN="True"
+INSTALL_DEPENDENCIES="True"
+
 # The default port where this Odoo instance will run under (provided you use the command -c in the terminal)
 # Set to true if you want to install it, false if you don't need it or have it already installed.
 INSTALL_WKHTMLTOPDF="True"
@@ -27,8 +33,7 @@ OE_PORT="8069"
 OE_VERSION="16.0"
 # Set this to True if you want to install the Odoo enterprise version!
 IS_ENTERPRISE="False"
-# Installs postgreSQL V14 instead of defaults (e.g V12 for Ubuntu 20/22) - this improves performance
-INSTALL_POSTGRESQL_FOURTEEN="True"
+
 # Set this to True if you want to install Nginx!
 INSTALL_NGINX="False"
 # Set the superadmin password - if GENERATE_RANDOM_PASSWORD is set to "True" we will automatically generate a random password, otherwise we use this one
@@ -84,29 +89,35 @@ if [ $INSTALL_POSTGRESQL_FOURTEEN = "True" ]; then
     sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
     sudo apt-get update
     sudo apt-get install postgresql-14
+    echo -e "\n---- Creating the ODOO PostgreSQL User  ----"
+    sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 else
-    echo -e "\n---- Installing the default postgreSQL version based on Linux version ----"
-    sudo apt-get install postgresql postgresql-server-dev-all -y
+    if [ $INSTALL_POSTGRESQL = "True" ]; then
+      echo -e "\n---- Installing the default postgreSQL version based on Linux version ----"
+      sudo apt-get install postgresql postgresql-server-dev-all -y
+      echo -e "\n---- Creating the ODOO PostgreSQL User  ----"
+      sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
+    else
+      echo "PostgreSQL Server isn't installed due to the choice of the user!"
+    fi  
 fi
-
-
-echo -e "\n---- Creating the ODOO PostgreSQL User  ----"
-sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 
 #--------------------------------------------------
 # Install Dependencies
 #--------------------------------------------------
-echo -e "\n--- Installing Python 3 + pip3 --"
-sudo apt-get install python3 python3-pip
-sudo apt-get install git python3-cffi build-essential wget python3-dev python3-venv python3-wheel libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools node-less libpng-dev libjpeg-dev gdebi -y
+if [ $INSTALL_DEPENDENCIES = "True" ]; then
+  echo -e "\n--- Installing Python 3 + pip3 --"
+  sudo apt-get install git python3 python3-pip build-essential wget python3-dev python3-venv python3-wheel libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools node-less libpng12-0 libjpeg-dev gdebi -y
 
-echo -e "\n---- Install python packages/requirements ----"
-sudo -H pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
+  echo -e "\n---- Install python packages/requirements ----"
+  sudo -H pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
 
-echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
-sudo apt-get install nodejs npm -y
-sudo npm install -g rtlcss
-
+  echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
+  sudo apt-get install nodejs npm -y
+  sudo npm install -g rtlcss
+else
+  echo "Dependencies isn't installed due to the choice of the user!"
+fi
 #--------------------------------------------------
 # Install Wkhtmltopdf if needed
 #--------------------------------------------------
