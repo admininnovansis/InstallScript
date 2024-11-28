@@ -72,6 +72,7 @@ if [ $INSTALL_DEPENDENCIES = "True" ]; then
   sudo apt-get install python3-pip wget gdebi python3-dev python3-venv python3-wheel libxml2-dev libpq-dev libjpeg8-dev liblcms2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential git libssl-dev libffi-dev libmysqlclient-dev libjpeg-dev libblas-dev libatlas-base-dev -y
 
   echo -e "\n---- Install python packages/requirements ----"
+  pip3 install werkzeug Pillow reportlab decorator psycopg2 lxml lxml[html_clean] psutil gevent docutils num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL pypdf2
   sudo -H pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
 
   echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
