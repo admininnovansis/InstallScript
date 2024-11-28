@@ -354,11 +354,3 @@ EOF
 else
   echo "Nginx isn't installed due to choice of the user!"
 fi
-
-
-
-sudo apt install python3-pip  wget python3-dev python3-venv python3-wheel libxml2-dev libpq-dev libjpeg8-dev liblcms2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential git libssl-dev libffi-dev libmysqlclient-dev libjpeg-dev libblas-dev libatlas-base-dev -y
-sudo useradd -m -d /opt/odoo15 -U -r -s /bin/bash odoo15
-sudo apt-get install wkhtmltopdf -y # https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
-su - odoo15
-git clone https://www.github.com/odoo/odoo --single-branch --branch 15.0 /opt/odoo15/odoo
