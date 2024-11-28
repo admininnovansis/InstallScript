@@ -81,8 +81,8 @@ else
   echo "Dependencies isn't installed due to the choice of the user!"
 fi
 
-WKHTMLTOX_X64="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jammy_amd64.deb"
-WKHTMLTOX_X32="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jammy_i386.deb"
+WKHTMLTOX_X64="https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb"
+WKHTMLTOX_X32="https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_i386.deb"
 --------------------------------------------------
 # Install Wkhtmltopdf if needed
 #--------------------------------------------------
