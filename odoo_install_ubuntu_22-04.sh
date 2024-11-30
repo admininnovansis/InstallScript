@@ -220,9 +220,7 @@ sudo chown root: /etc/systemd/system/$OE_CONFIG
 
 echo -e "* Start ODOO on Startup"
 sudo systemctl daemon-reload
-sudo systemctl enable odoo
-sudo systemctl start odoo
-sudo systemctl status odoo
+sudo systemctl enable $OE_CONFIG
 
 #--------------------------------------------------
 # Install Nginx if needed
@@ -330,7 +328,8 @@ else
 fi
 
 echo -e "* Starting Odoo Service"
-sudo su root -c "/etc/init.d/$OE_CONFIG start"
+sudo systemctl start $OE_CONFIG
+sudo systemctl status $OE_CONFIG
 echo "-----------------------------------------------------------"
 echo "Done! The Odoo server is up and running. Specifications:"
 echo "Port: $OE_PORT"
@@ -341,9 +340,9 @@ echo "User PostgreSQL: $OE_USER"
 echo "Code location: $OE_USER"
 echo "Addons folder: $OE_USER/$OE_CONFIG/addons/"
 echo "Password superadmin (database): $OE_SUPERADMIN"
-echo "Start Odoo service: sudo service $OE_CONFIG start"
-echo "Stop Odoo service: sudo service $OE_CONFIG stop"
-echo "Restart Odoo service: sudo service $OE_CONFIG restart"
+echo "Start Odoo service: sudo systemctl start $OE_CONFIG"
+echo "Stop Odoo service: sudo systemctl stop $OE_CONFIG"
+echo "Restart Odoo service: sudo systemctl restart $OE_CONFIG"
 if [ $INSTALL_NGINX = "True" ]; then
   echo "Nginx configuration file: /etc/nginx/sites-available/$WEBSITE_NAME"
 fi
