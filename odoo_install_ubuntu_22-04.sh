@@ -71,10 +71,6 @@ if [ $INSTALL_DEPENDENCIES = "True" ]; then
   echo -e "\n--- Installing Python 3 + pip3 --"
   sudo apt-get install python3-pip wget gdebi python3-dev python3-venv python3-wheel libxml2-dev libpq-dev libjpeg8-dev liblcms2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential git libssl-dev libffi-dev libmysqlclient-dev libjpeg-dev libblas-dev libatlas-base-dev -y
 
-  echo -e "\n---- Install python packages/requirements ----"
-  pip3 install werkzeug Pillow reportlab decorator psycopg2 lxml lxml[html_clean] psutil gevent docutils num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL pypdf2
-  sudo -H pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
-
   echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
   sudo apt-get install nodejs npm -y
   sudo npm install -g rtlcss
@@ -113,7 +109,37 @@ sudo adduser $OE_USER sudo
 
 echo -e "\n---- Create Log directory ----"
 sudo mkdir /var/log/$OE_USER
-sudo chown $OE_USER:$OE_USER /var/log/$OE_USER
+sudo chown $OE_USER:$OE_USER /var/log/$OE_SUPERADMIN
+
+#--------------------------------------------------
+# Config Python's virtualenv tools
+#--------------------------------------------------
+if [ ! -f "/usr/bin/virtualenv" ]; then
+    sudo apt-get install virtualenv 
+fi
+
+if [ ! -d "/usr/share/virtualenvwrapper" ]; then
+    sudo apt-get install virtualenvwrapper
+fi
+
+if grep -Fxq "# virtualenv wrapper" ~/.bashrc; then
+cat >> ~/.bashrc << 'EOF' 
+# virtualenv wrapper
+source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+EOF
+source ~/.bashrc
+fi
+
+source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+ODOO_VENV="odoo-$ODOO_VERSION"
+if [ ! -d "~/.virtualenvs/$ODOO_VENV" ]; then
+  mkvirtualenv $ODOO_VENV
+  workon $ODOO_VENV
+fi
+echo -e "\n---- Install python packages/requirements ----"
+pip3 install werkzeug Pillow reportlab decorator psycopg2 lxml lxml[html_clean] psutil gevent docutils num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL pypdf2
+pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
+
 
 #--------------------------------------------------
 # Install ODOO
@@ -183,6 +209,7 @@ sudo chmod 640 /etc/${OE_CONFIG}.conf
 
 echo -e "* Create startup file"
 sudo su root -c "echo '#!/bin/sh' >> $OE_HOME_EXT/start.sh"
+sudo su root -c "echo 'mkvirtualenv $ODOO_VENV'"
 sudo su root -c "echo 'sudo -u $OE_USER $OE_HOME_EXT/odoo-bin --config=/etc/${OE_CONFIG}.conf' >> $OE_HOME_EXT/start.sh"
 sudo chmod 755 $OE_HOME_EXT/start.sh
 
