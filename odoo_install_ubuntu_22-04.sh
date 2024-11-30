@@ -131,7 +131,7 @@ source ~/.bashrc
 fi
 
 source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
-ODOO_VENV="odoo-$ODOO_VERSION"
+ODOO_VENV="odoo-$OE_VERSION"
 if [ ! -d "~/.virtualenvs/$ODOO_VENV" ]; then
   mkvirtualenv $ODOO_VENV
   workon $ODOO_VENV
