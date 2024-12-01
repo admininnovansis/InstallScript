@@ -196,7 +196,7 @@ Group=odoo
 
 # Entorno virtual y directorio de trabajo
 WorkingDirectory=$OE_HOME_EXT
-ExecStart=/root/.vitualenvs/$ODOO_VENV/bin/python $OE_HOME_EXT/odoo-bin --config=/etc/${OE_CONFIG}.conf
+ExecStart=/root/.virtualenvs/$ODOO_VENV/bin/python $OE_HOME_EXT/odoo-bin --config=/etc/${OE_CONFIG}.conf
 
 # Variables de entorno opcionales
 Environment=PYTHONIOENCODING=UTF-8
