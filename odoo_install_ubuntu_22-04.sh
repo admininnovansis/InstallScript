@@ -51,7 +51,7 @@ sudo apt update -y && apt upgrade -y
 #--------------------------------------------------
 # Install PostgreSQL Server
 #--------------------------------------------------
-sudo apt-get install postgresql-server-dev-all
+sudo apt-get install postgresql-server-dev-all -y
 if [ $INSTALL_POSTGRES = "True" ]; then
   echo -e "\n---- Install PostgreSQL Server ----"
   sudo apt-get install postgresql -y
@@ -67,7 +67,7 @@ fi
 #--------------------------------------------------
 if [ $INSTALL_DEPENDENCIES = "True" ]; then
   echo -e "\n--- Installing Python 3 + pip3 --"
-  sudo apt-get install python3-pip wget gdebi python3-dev python3-venv python3-wheel libxml2-dev libpq-dev libjpeg8-dev liblcms2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential git libssl-dev libffi-dev libmysqlclient-dev libjpeg-dev libblas-dev libatlas-base-dev -y
+  sudo apt-get install python3-pip wget gdebi python3-dev virtualenv virtualenvwrapper python3-wheel libxml2-dev libpq-dev libjpeg8-dev liblcms2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential git libssl-dev libffi-dev libmysqlclient-dev libjpeg-dev libblas-dev libatlas-base-dev -y
 
   echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
   sudo apt-get install nodejs npm -y
@@ -112,31 +112,23 @@ sudo chown $OE_USER:$OE_USER /var/log/$OE_USER
 #--------------------------------------------------
 # Config Python's virtualenv tools
 #--------------------------------------------------
-if [ ! -f "/usr/bin/virtualenv" ]; then
-    sudo apt-get install virtualenv 
-fi
-
-if [ ! -d "/usr/share/virtualenvwrapper" ]; then
-    sudo apt-get install virtualenvwrapper
-fi
-
-if grep -Fxq "# virtualenv wrapper" ~/.bashrc; then
-cat >> ~/.bashrc << 'EOF' 
+# TODO: .bashrc no exists yet
+if grep -Fxq "# virtualenv wrapper" $OE_HOME/.bashrc; then
+cat >> $OE_HOME/.bashrc << 'EOF' 
 # virtualenv wrapper
 source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
 EOF
 fi
 
-source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
 ODOO_VENV="odoo-$OE_VERSION"
-if [ ! -d "~/.virtualenvs/$ODOO_VENV" ]; then
-  mkvirtualenv $ODOO_VENV
+if [ ! -d "$OE_HOME/.virtualenvs/$ODOO_VENV" ]; then
+  sudo su $OE_USER -c "source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && mkvirtualenv -a $OE_HOME/.virtualenvs $ODOO_VENV"
 fi
-workon $ODOO_VENV
 
 echo -e "\n---- Install python packages/requirements ----"
-pip3 install werkzeug Pillow reportlab decorator psycopg2 lxml lxml[html_clean] psutil gevent docutils num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL pypdf2
-pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
+
+sudo su $OE_USER -c "source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && workon $ODOO_VENV && pip3 install werkzeug Pillow reportlab decorator psycopg2 lxml lxml[html_clean] psutil gevent docutils num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL pypdf2" 
+sudo su $OE_USER -c "source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && workon $ODOO_VENV && pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt"
 
 #--------------------------------------------------
 # Install ODOO
@@ -196,7 +188,7 @@ Group=odoo
 
 # Entorno virtual y directorio de trabajo
 WorkingDirectory=$OE_HOME_EXT
-ExecStart=/root/.virtualenvs/$ODOO_VENV/bin/python $OE_HOME_EXT/odoo-bin --config=/etc/${OE_CONFIG}.conf
+ExecStart=/odoo/.virtualenvs/$ODOO_VENV/bin/python $OE_HOME_EXT/odoo-bin --config=/etc/${OE_CONFIG}.conf
 
 # Variables de entorno opcionales
 Environment=PYTHONIOENCODING=UTF-8
@@ -214,13 +206,13 @@ WantedBy=multi-user.target
 EOF
 
 echo -e "* Security Init File"
-sudo mv ~/$OE_CONFIG /etc/systemd/system/$OE_CONFIG
-sudo chmod 755 /etc/systemd/system/$OE_CONFIG
-sudo chown root: /etc/systemd/system/$OE_CONFIG
+sudo mv ~/$OE_CONFIG /etc/systemd/system/${OE_CONFIG}.service
+sudo chmod 755 /etc/systemd/system/${OE_CONFIG}.service
+sudo chown root: /etc/systemd/system/${OE_CONFIG}.service
 
 echo -e "* Start ODOO on Startup"
 sudo systemctl daemon-reload
-sudo systemctl enable $OE_CONFIG
+sudo systemctl enable ${OE_CONFIG}.service
 
 #--------------------------------------------------
 # Install Nginx if needed
