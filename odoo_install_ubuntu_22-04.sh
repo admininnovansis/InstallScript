@@ -113,12 +113,15 @@ sudo chown $OE_USER:$OE_USER /var/log/$OE_USER
 # Config Python's virtualenv tools
 #--------------------------------------------------
 # TODO: .bashrc no exists yet
+sudo touch $OE_HOME/.bashrc
 if grep -Fxq "# virtualenv wrapper" $OE_HOME/.bashrc; then
-cat >> $OE_HOME/.bashrc << 'EOF' 
+sudo cat >> $OE_HOME/.bashrc << 'EOF' 
 # virtualenv wrapper
 source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
 EOF
 fi
+sudo chmod 644 $OE_HOME/.bashrc
+sudo chown $OE_USER:$OE_USER $OE_HOME/.bashrc
 
 ODOO_VENV="odoo-$OE_VERSION"
 if [ ! -d "$OE_HOME/.virtualenvs/$ODOO_VENV" ]; then
